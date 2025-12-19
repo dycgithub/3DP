@@ -5,18 +5,18 @@ using TMPro;
 namespace UI.Loops
 {
     /// <summary>
-    /// Example implementation of ILoopItem for string data
-    /// This component should be attached to your item prefab
+    /// 字符串数据的ILoopItem实现示例
+    /// 此组件应附加到您的项预制体上
     /// </summary>
     public class ExampleLoopItem : MonoBehaviour, ILoopItem<string>
     {
-        [Header("UI Components")]
+        [Header("UI 组件")]
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI descriptionText;
         [SerializeField] private Button itemButton;
         [SerializeField] private Image backgroundImage;
 
-        [Header("Colors")]
+        [Header("颜色")]
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color selectedColor = Color.yellow;
 
@@ -42,14 +42,16 @@ namespace UI.Loops
 
         private void Awake()
         {
-            // Cache components
+            // 缓存组件
             _rectTransform = GetComponent<RectTransform>();
 
-            // Setup button click
+            // 设置按钮点击
             if (itemButton != null)
             {
                 itemButton.onClick.AddListener(OnItemClicked);
             }
+            
+            
         }
 
         public void UpdateContent(string data)
@@ -63,10 +65,10 @@ namespace UI.Loops
 
             if (descriptionText != null)
             {
-                descriptionText.text = $"This is item number {data} with index {_dataIndex}";
+                descriptionText.text = $"这是第 {data} 个项，索引为 {_dataIndex}";
             }
 
-            // Alternate colors for visual distinction
+            // 交替颜色以实现视觉区分
             if (backgroundImage != null)
             {
                 backgroundImage.color = _dataIndex % 2 == 0 ? normalColor : selectedColor * 0.3f;
@@ -90,10 +92,10 @@ namespace UI.Loops
 
         private void OnItemClicked()
         {
-            Debug.Log($"Item clicked: {_currentData} (Index: {_dataIndex})");
+            Debug.Log($"项被点击: {_currentData} (索引: {_dataIndex})");
 
-            // You can trigger events or callbacks here
-            // Example: OnItemClick?.Invoke(_dataIndex, _currentData);
+            // 您可以在此处触发事件或回调
+            // 示例: OnItemClick?.Invoke(_dataIndex, _currentData);
         }
 
         private void OnDestroy()

@@ -6,6 +6,7 @@ public class Health: MonoBehaviour
     [SerializeField] FloatEventChannel playerHealthChannel;
 
     int currentHealth;
+    public bool canDead;
         
     public bool IsDead => currentHealth <= 0;
         
@@ -25,7 +26,7 @@ public class Health: MonoBehaviour
     void PublishHealthPercentage() {
         if (playerHealthChannel != null)
             playerHealthChannel.Invoke(currentHealth / (float) maxHealth);
-        if (IsDead)
+        if (IsDead&&canDead)
         {
             Destroy(gameObject);
         }

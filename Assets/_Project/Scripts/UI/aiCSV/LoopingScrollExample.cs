@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI.Loops
 {
     /// <summary>
-    /// Example usage of the LoopingScrollController
-    /// Attach this to a GameObject to demonstrate the scrolling list
+    /// 循环滚动控制器的使用示例
+    /// 将此脚本附加到游戏对象上来演示滚动列表功能
     /// </summary>
     public class LoopingScrollExample : MonoBehaviour
     {
-        [Header("Scroll List Setup")]
+        [Header("滚动列表设置")]
         [SerializeField] private LoopingScrollController<string> scrollController;
-        [SerializeField] private int itemCount = 1000;
+        [SerializeField] private int itemCount = 100;
 
-        [Header("Controls")]
+        [Header("控制按钮")]
         [SerializeField] private Button addButton;
         [SerializeField] private Button removeButton;
         [SerializeField] private Button scrollToTopButton;
@@ -87,12 +88,12 @@ namespace UI.Loops
 
         private void OnItemVisible(int index, string data)
         {
-            // Debug.Log($"Visible: {data} at index {index}");
+            // Debug.Log($"可见项: {data} 索引 {index}");
         }
 
         private void Update()
         {
-            // Example: Update specific item based on input or game state
+            // 示例：基于输入或游戏状态更新特定项
             if (Input.GetKeyDown(KeyCode.U))
             {
                 int randomIndex = Random.Range(0, dataItems.Count);
@@ -108,7 +109,7 @@ namespace UI.Loops
                 scrollController.OnItemVisible -= OnItemVisible;
             }
 
-            // Clean up button listeners
+            // 清理按钮监听器
             if (addButton != null)
             {
                 addButton.onClick.RemoveAllListeners();

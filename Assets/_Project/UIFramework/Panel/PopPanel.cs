@@ -316,9 +316,9 @@ public class PopPanel : BasePanel
     /// <summary>
     /// 清理资源 / Clean up resources
     /// </summary>
-    protected override void OnDestroy()
+    private void OnDestroy()
     {
-        base.OnDestroy();
+        base.OnExit();
 
         // 停止所有动画 / Stop all animations
         StopAllAnimations();

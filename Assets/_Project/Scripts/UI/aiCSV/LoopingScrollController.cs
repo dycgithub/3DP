@@ -5,66 +5,66 @@ using UnityEngine.UI;
 namespace UI.Loops
 {
     /// <summary>
-    /// High-performance infinite scrolling list controller for UGUI
-    /// Only instantiates items needed for viewport plus 1-2 extra items
+    /// 用于UGUI的高性能无限滚动列表控制器
+    /// 只实例化视口所需项以及1-2个额外项
     /// </summary>
-    /// <typeparam name="T">The type of data to display</typeparam>
+    /// <typeparam name="T">要显示的数据类型</typeparam>
     [RequireComponent(typeof(ScrollRect))]
     public class LoopingScrollController<T> : MonoBehaviour
     {
-        [Header("Setup")]
+        [Header("设置")]
         [SerializeField] private GameObject itemPrefab;
         [SerializeField] private float itemHeight = 100f;
 
-        [Header("Performance Settings")]
-        [SerializeField] private int extraItems = 2; // Extra items beyond viewport
+        [Header("性能设置")]
+        [SerializeField] private int extraItems = 2; // 视口之外的额外项
 
-        [Header("Debug")]
+        [Header("调试")]
         [SerializeField] private bool debugLog = false;
 
         private ScrollRect scrollRect;
         private RectTransform contentRectTransform;
         private RectTransform viewportRectTransform;
 
-        // Pool of recyclable items
+        // 可回收项的池
         private readonly Queue<ILoopItem<T>> itemPool = new Queue<ILoopItem<T>>();
         private readonly List<ILoopItem<T>> activeItems = new List<ILoopItem<T>>();
 
-        // Data management
+        // 数据管理
         private IList<T> dataList;
         private int totalItemCount;
         private float contentHeight;
 
-        // Performance optimization
-        private readonly Vector2[] corners = new Vector2[4];
+        // 性能优化
+        private readonly Vector3[] corners = new Vector3[4];
         private float viewportMinY;
         private float viewportMaxY;
 
-        // Events
+        // 事件
         public System.Action<int, T> OnItemVisible;
 
         /// <summary>
-        /// Initialize the scrolling list with data
+        /// 使用数据初始化滚动列表
         /// </summary>
-        /// <param name="data">List of data to display</param>
+        /// <param name="data">要显示的数据列表</param>
         public void Initialize(IList<T> data)
         {
             if (itemPrefab == null)
             {
-                Debug.LogError("Item prefab is not assigned!", this);
+                Debug.LogError("未分配项预制体！", this);
                 return;
             }
 
-            // Cache references
+            // 缓存引用
             scrollRect = GetComponent<ScrollRect>();
             contentRectTransform = scrollRect.content;
             viewportRectTransform = scrollRect.viewport;
 
-            // Setup scroll rect
+            // 设置滚动矩形
             scrollRect.onValueChanged.RemoveListener(OnScrollPositionChanged);
             scrollRect.onValueChanged.AddListener(OnScrollPositionChanged);
 
-            // Set data
+            // 设置数据
             dataList = data;
             totalItemCount = data?.Count ?? 0;
 
@@ -74,31 +74,31 @@ namespace UI.Loops
                 return;
             }
 
-            // Calculate content height
+            // 计算内容高度
             contentHeight = totalItemCount * itemHeight;
             contentRectTransform.sizeDelta = new Vector2(contentRectTransform.sizeDelta.x, contentHeight);
 
-            // Initialize viewport bounds
+            // 初始化视口边界
             viewportRectTransform.GetWorldCorners(corners);
             viewportMinY = corners[0].y;
             viewportMaxY = corners[1].y;
 
-            // Clear existing items
+            // 清除现有项
             ClearItems();
 
-            // Initialize visible items
+            // 初始化可见项
             InitializeVisibleItems();
 
             if (debugLog)
-                Debug.Log($"Initialized with {totalItemCount} items, content height: {contentHeight}");
+                Debug.Log($"初始化了 {totalItemCount} 个项目，内容高度: {contentHeight}");
         }
 
         /// <summary>
-        /// Clear all items and return them to pool
+        /// 清除所有项并将其返回到池中
         /// </summary>
         private void ClearItems()
         {
-            // Return all active items to pool
+            // 将所有活动项返回到池中
             for (int i = activeItems.Count - 1; i >= 0; i--)
             {
                 var item = activeItems[i];
@@ -108,7 +108,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Initialize items that should be visible in the viewport
+        /// 初始化应在视口中可见的项
         /// </summary>
         private void InitializeVisibleItems()
         {
@@ -118,18 +118,18 @@ namespace UI.Loops
             int visibleItemCount = Mathf.CeilToInt(visibleHeight / itemHeight);
             int totalVisibleItems = visibleItemCount + extraItems * 2;
 
-            // Clamp to total item count
+            // 限制总项数
             totalVisibleItems = Mathf.Min(totalVisibleItems, totalItemCount);
 
-            // Calculate starting index based on scroll position
+            // 根据滚动位置计算起始索引
             float scrollNormalized = scrollRect.normalizedPosition.y;
             int startIndex = Mathf.FloorToInt((1f - scrollNormalized) * (totalItemCount - visibleItemCount));
             startIndex = Mathf.Clamp(startIndex, 0, Mathf.Max(0, totalItemCount - visibleItemCount));
 
             if (debugLog)
-                Debug.Log($"Creating {totalVisibleItems} visible items starting from index {startIndex}");
+                Debug.Log($"创建 {totalVisibleItems} 个可见项，起始索引为 {startIndex}");
 
-            // Create initial visible items
+            // 创建初始可见项
             for (int i = 0; i < totalVisibleItems; i++)
             {
                 int dataIndex = startIndex + i;
@@ -142,7 +142,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Get an item from the pool or create a new one
+        /// 从池中获取项或创建新项
         /// </summary>
         private ILoopItem<T> GetItemFromPool()
         {
@@ -153,25 +153,25 @@ namespace UI.Loops
                 return item;
             }
 
-            // Create new item
+            // 创建新项
             var newItem = Instantiate(itemPrefab, contentRectTransform);
             var loopItem = newItem.GetComponent<ILoopItem<T>>();
 
             if (loopItem == null)
             {
-                Debug.LogError($"Item prefab must implement ILoopItem<{typeof(T).Name}> interface!", this);
+                Debug.LogError($"项预制体必须实现 ILoopItem<{typeof(T).Name}> 接口！", this);
                 Destroy(newItem);
                 return null;
             }
 
-            // Set item height
+            // 设置项高度
             loopItem.RectTransform.sizeDelta = new Vector2(loopItem.RectTransform.sizeDelta.x, itemHeight);
 
             return loopItem;
         }
 
         /// <summary>
-        /// Return an item to the pool for reuse
+        /// 将项返回到池中以供重用
         /// </summary>
         private void ReturnItemToPool(ILoopItem<T> item)
         {
@@ -183,41 +183,41 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Setup an item with data and position
+        /// 使用数据和位置设置项
         /// </summary>
         private void SetupItem(ILoopItem<T> item, int dataIndex)
         {
             if (item == null || dataIndex < 0 || dataIndex >= totalItemCount) return;
 
-            // Set position
+            // 设置位置
             item.RectTransform.anchoredPosition = new Vector2(0, -dataIndex * itemHeight);
 
-            // Set data
+            // 设置数据
             item.DataIndex = dataIndex;
             item.UpdateContent(dataList[dataIndex]);
 
-            // Trigger event
+            // 触发事件
             OnItemVisible?.Invoke(dataIndex, dataList[dataIndex]);
         }
 
         /// <summary>
-        /// Handle scroll position changes
+        /// 处理滚动位置变化
         /// </summary>
         private void OnScrollPositionChanged(Vector2 position)
         {
             if (totalItemCount == 0 || activeItems.Count == 0) return;
 
-            // Update viewport bounds
+            // 更新视口边界
             viewportRectTransform.GetWorldCorners(corners);
             viewportMinY = corners[0].y;
             viewportMaxY = corners[1].y;
 
-            // Check which items need to be recycled
+            // 检查哪些项需要回收
             RecycleItems();
         }
 
         /// <summary>
-        /// Recycle items that are out of viewport and create new visible items
+        /// 回收视口外的项并创建新的可见项
         /// </summary>
         private void RecycleItems()
         {
@@ -225,11 +225,11 @@ namespace UI.Loops
             float minY = -contentHeight;
             float maxY = 0;
 
-            // Convert viewport bounds to content space
+            // 将视口边界转换为内容空间
             viewportMinY = contentRectTransform.InverseTransformPoint(Vector3.up * viewportMinY).y;
             viewportMaxY = contentRectTransform.InverseTransformPoint(Vector3.up * viewportMaxY).y;
 
-            // Extend bounds by extra items
+            // 通过额外项扩展边界
             float extendedMinY = viewportMinY - itemHeight * extraItems;
             float extendedMaxY = viewportMaxY + itemHeight * extraItems;
 
@@ -238,20 +238,20 @@ namespace UI.Loops
                 var item = activeItems[i];
                 float itemY = item.RectTransform.anchoredPosition.y;
 
-                // Check if item is outside the extended viewport
+                // 检查项是否在扩展视口之外
                 if (itemY < extendedMinY || itemY > extendedMaxY + itemHeight)
                 {
-                    // Find new data index for this item
+                    // 为此项查找新数据索引
                     int newIndex = FindNewDataIndex(itemY);
 
                     if (newIndex >= 0 && newIndex < totalItemCount)
                     {
-                        // Repurpose item for new data
+                        // 重新利用项用于新数据
                         SetupItem(item, newIndex);
                     }
                     else
                     {
-                        // Return to pool if no valid data
+                        // 如果没有有效数据则返回到池中
                         activeItems.RemoveAt(i);
                         ReturnItemToPool(item);
                     }
@@ -260,11 +260,11 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Find the appropriate data index for an item at the given position
+        /// 查找给定位置项的适当数据索引
         /// </summary>
         private int FindNewDataIndex(float itemY)
         {
-            // Find the closest visible item
+            // 查找最近的可见项
             float closestY = float.MaxValue;
             int closestIndex = -1;
 
@@ -283,7 +283,7 @@ namespace UI.Loops
 
             if (closestIndex == -1) return -1;
 
-            // Calculate new index based on position relative to closest item
+            // 根据相对于最近项的位置计算新索引
             float positionDiff = itemY - activeItems[0].RectTransform.anchoredPosition.y;
             int indexDiff = Mathf.RoundToInt(positionDiff / itemHeight);
 
@@ -291,7 +291,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Refresh the list with new data
+        /// 使用新数据刷新列表
         /// </summary>
         public void Refresh(IList<T> newData)
         {
@@ -299,7 +299,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Update item at specific index
+        /// 更新指定索引处的项
         /// </summary>
         public void UpdateItemAt(int index, T data)
         {
@@ -307,7 +307,7 @@ namespace UI.Loops
 
             dataList[index] = data;
 
-            // Find active item with this index
+            // 查找具有此索引的活动项
             for (int i = 0; i < activeItems.Count; i++)
             {
                 if (activeItems[i].DataIndex == index)
@@ -319,7 +319,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Scroll to specific item index
+        /// 滚动到指定项索引
         /// </summary>
         public void ScrollToIndex(int index, bool animated = true)
         {
@@ -330,7 +330,7 @@ namespace UI.Loops
 
             if (animated)
             {
-                // Simple animation - could be enhanced with coroutine for smooth scrolling
+                // 简单动画 - 可以通过协程增强以实现平滑滚动
                 scrollRect.normalizedPosition = Vector2.Lerp(scrollRect.normalizedPosition, targetPosition, Time.deltaTime * 10f);
             }
             else
@@ -340,7 +340,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Get the currently visible data indices
+        /// 获取当前可见的数据索引
         /// </summary>
         public List<int> GetVisibleIndices()
         {
@@ -353,7 +353,7 @@ namespace UI.Loops
         }
 
         /// <summary>
-        /// Cleanup when destroyed
+        /// 销毁时清理
         /// </summary>
         private void OnDestroy()
         {

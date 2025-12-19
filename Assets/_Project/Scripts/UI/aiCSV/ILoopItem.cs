@@ -3,29 +3,29 @@ using UnityEngine;
 namespace UI.Loops
 {
     /// <summary>
-    /// Interface for items that can be used in a LoopingScrollController
+    /// 可在LoopingScrollController中使用的项的接口
     /// </summary>
-    /// <typeparam name="T">The type of data this item displays</typeparam>
+    /// <typeparam name="T">此项显示的数据类型</typeparam>
     public interface ILoopItem<T>
     {
         /// <summary>
-        /// Updates the item's content with new data
+        /// 使用新数据更新项的内容
         /// </summary>
-        /// <param name="data">The data to display</param>
+        /// <param name="data">要显示的数据</param>
         void UpdateContent(T data);
 
         /// <summary>
-        /// Called when the item is recycled and should be reset
+        /// 当项被回收且应被重置时调用
         /// </summary>
         void ResetItem();
 
         /// <summary>
-        /// Gets the RectTransform of the item
+        /// 获取项的RectTransform
         /// </summary>
         RectTransform RectTransform { get; }
 
         /// <summary>
-        /// Gets the current data index this item is displaying
+        /// 获取此项正在显示的当前数据索引
         /// </summary>
         int DataIndex { get; set; }
     }
